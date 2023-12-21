@@ -27,6 +27,13 @@ mv temp/* .
 mv temp//.git* .
 rmdir temp
 
+git config diff.renameLimit 999999
+CHANGED_DATA_FILES=$(git diff --name-only -r HEAD^1 HEAD | wc -l)
+if [[ $CHANGED_DATA_FILES -gt 3000 ]]; then
+    echo "More than 3000 files added/changed ($CHANGED_DATA_FILES files total). Please, push commit with changes in less than 3000 files"
+    exit 1
+fi
+
 set +e
 set +o pipefail
 # remove unused branches before creating new
@@ -62,4 +69,4 @@ python3 scripts/simple_data_check.py
 set +e
 export GH_TOKEN=${ACTION_TOKEN}
 gh api -X POST /repos/tradingview-pine-seeds/${REPO_NAME}/pulls -f base="master" -f head="${REPO_OWNER}:${PR_BRANCH_NAME}" -f title="Upload data" > /dev/null 2>&1
-echo 
+echo
